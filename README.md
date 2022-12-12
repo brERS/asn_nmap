@@ -5,8 +5,10 @@ Library created with the aim of facilitating the obtaining of ips service status
 Description. 
 - The package asn_nmap is used to:
 	
+	- Asn:
+		- get_ips
 	- Nmap: 
-		- scan_asn 
+		- main 
 
 
 ## Installation
@@ -22,10 +24,15 @@ pip install asn-nmap
 
 #### Get information from a asn
 ```python
+from asn_nmap.asn import Asn
 from asn_nmap.nmap import Nmap
 
-nmap = Nmap()
-nmap.scan_asn(15169, [80, 443])
+asn = '15169'
+port_scan = [80, 443]
+
+asn_response = Asn(asn)
+
+Nmap(asn, asn_response.get_ips(), port_scan).main()
 ```
 
 #### an output.xlsx file will be automatically generated
