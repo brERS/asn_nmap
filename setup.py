@@ -8,7 +8,7 @@ with open("requirements.txt") as f:
 
 setup(
     name="asn-nmap",
-    version="0.1.1",
+    version="0.1.2",
     author="Edgar Reis",
     description="Get status service from a ASN.",
     long_description=page_description,

@@ -1,7 +1,7 @@
 import os
 import re
 import subprocess
-
+from rich import print as rprint
 import pandas as pd
 
 
@@ -46,8 +46,10 @@ class Nmap:
 
     def run_range(self):
         """ Run nmap scan range"""
-
+        
         for range in self.output_clean:
+
+            rprint(f"[green]Processing range {range}[/green]")
 
             self.output = subprocess.run([
                 "nmap",
@@ -55,8 +57,8 @@ class Nmap:
                 "-Pn",
                 f"-p{','.join([str(port) for port in self.ports])}",
                 f"{range}"
-            ], capture_output=True)
-
+            ], capture_output=True)            
+            
             for output_line in self.output.stdout.decode("utf-8").splitlines():
 
                 if output_line.count('Nmap scan report for') > 0:
@@ -69,7 +71,7 @@ class Nmap:
                 if output_line.count('udp') > 0:
                     self.write = f"{self.asn},{ip},{output_line.split()[0].split('/')[0]},{output_line.split()[0].split('/')[1]},{output_line.split()[1]},{output_line.split()[2]}\n"
                     self.write_file()
-
+           
     def write_file(self):
         """ Write file """
 
