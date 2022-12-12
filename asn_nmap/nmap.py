@@ -49,34 +49,36 @@ class Nmap:
 
         for range in self.output_clean:
 
-            if range == '187.85.84.0/22':
+            self.output = subprocess.run([
+                "nmap",
+                "-n",
+                "-Pn",
+                f"-p{','.join([str(port) for port in self.ports])}",
+                f"{range}"
+            ], capture_output=True)
 
-                self.output = subprocess.run([
-                    "nmap",
-                    "-n",
-                    "-Pn",
-                    f"-p{','.join([str(port) for port in self.ports])}",
-                    f"{range}"
-                ], capture_output=True)
+            for output_line in self.output.stdout.decode("utf-8").splitlines():
 
-                for output_line in self.output.stdout.decode("utf-8").splitlines():
+                if output_line.count('Nmap scan report for') > 0:
+                    ip = output_line.split()[4]
 
-                    if output_line.count('Nmap scan report for') > 0:
-                        ip = output_line.split()[4]
+                if output_line.count('tcp') > 0:
+                    self.write = f"{self.asn},{ip},{output_line.split()[0].split('/')[0]},{output_line.split()[0].split('/')[1]},{output_line.split()[1]},{output_line.split()[2]}\n"
+                    self.write_file()
 
-                    if output_line.count('tcp') > 0:
-                        self.write = f"{self.asn},{ip},{output_line.split()[0].split('/')[0]},{output_line.split()[0].split('/')[1]},{output_line.split()[1]},{output_line.split()[2]}\n"
-                        self.write_file()
-
-                    if output_line.count('udp') > 0:
-                        self.write = f"{self.asn},{ip},{output_line.split()[0].split('/')[0]},{output_line.split()[0].split('/')[1]},{output_line.split()[1]},{output_line.split()[2]}\n"
-                        self.write_file()
+                if output_line.count('udp') > 0:
+                    self.write = f"{self.asn},{ip},{output_line.split()[0].split('/')[0]},{output_line.split()[0].split('/')[1]},{output_line.split()[1]},{output_line.split()[2]}\n"
+                    self.write_file()
 
     def write_file(self):
         """ Write file """
 
-        with open(self.file_output_temp, "a") as file:
-            file.write(self.write)
+        try:
+            with open(self.file_output_temp, "a") as file:
+                file.write(self.write)
+        except FileNotFoundError:
+            with open(self.file_output_temp, "w") as file:
+                file.write(self.write)
 
     def read_file_to_export(self):
 
@@ -93,6 +95,7 @@ class Nmap:
             df3.to_excel(writer, sheet_name='Dashboard', index=False)
             df2.to_excel(writer, sheet_name='Port Open', index=False)
             df.to_excel(writer, sheet_name='All', index=False)
+
 
     def rm_file(self):
         """ Remove file """
