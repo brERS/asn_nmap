@@ -1,8 +1,9 @@
 import os
 import re
 import subprocess
-from rich import print as rprint
+
 import pandas as pd
+from rich import print as rprint
 
 
 class Nmap:
@@ -15,7 +16,6 @@ class Nmap:
         self.output_clean = None
         self.write = None
         self.file_output_temp = 'output_temp.csv'
-        self.file_output = 'output.xlsx'
 
     def scan_asn(self, asn, ports):
         """ Run nmap scan asn"""
@@ -46,7 +46,7 @@ class Nmap:
 
     def run_range(self):
         """ Run nmap scan range"""
-        
+
         for range in self.output_clean:
 
             rprint(f"[green]Processing range {range}[/green]")
@@ -57,8 +57,8 @@ class Nmap:
                 "-Pn",
                 f"-p{','.join([str(port) for port in self.ports])}",
                 f"{range}"
-            ], capture_output=True)            
-            
+            ], capture_output=True)
+
             for output_line in self.output.stdout.decode("utf-8").splitlines():
 
                 if output_line.count('Nmap scan report for') > 0:
@@ -71,7 +71,7 @@ class Nmap:
                 if output_line.count('udp') > 0:
                     self.write = f"{self.asn},{ip},{output_line.split()[0].split('/')[0]},{output_line.split()[0].split('/')[1]},{output_line.split()[1]},{output_line.split()[2]}\n"
                     self.write_file()
-           
+
     def write_file(self):
         """ Write file """
 
@@ -93,7 +93,7 @@ class Nmap:
         df3 = df2.groupby(['ASN', 'Port']).size(
         ).reset_index(name='Quantidade')
 
-        with pd.ExcelWriter(self.file_output) as writer:
+        with pd.ExcelWriter(f'{self.asn}_output.xlsx') as writer:
             df3.to_excel(writer, sheet_name='Dashboard', index=False)
             df2.to_excel(writer, sheet_name='Port Open', index=False)
             df.to_excel(writer, sheet_name='All', index=False)
