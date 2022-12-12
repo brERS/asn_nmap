@@ -35,28 +35,26 @@ class Nmap:
 
             rprint(f"[blue]INFO: Processing range {range}[/blue]")
 
-            if range == '187.85.80.0/20':
+            self.output = subprocess.run([
+                "nmap",
+                "-n",
+                "-Pn",
+                f"-p{','.join([str(port) for port in self.ports])}",
+                f"{range}"
+            ], capture_output=True)
 
-                self.output = subprocess.run([
-                    "nmap",
-                    "-n",
-                    "-Pn",
-                    f"-p{','.join([str(port) for port in self.ports])}",
-                    f"{range}"
-                ], capture_output=True)
+            for output_line in self.output.stdout.decode("utf-8").splitlines():  # noqa: E501
 
-                for output_line in self.output.stdout.decode("utf-8").splitlines():  # noqa: E501
+                if output_line.count('Nmap scan report for') > 0:
+                    ip = output_line.split()[4]
 
-                    if output_line.count('Nmap scan report for') > 0:
-                        ip = output_line.split()[4]
+                if output_line.count('tcp') > 0:
+                    self.write = f"{self.asn},{ip},{output_line.split()[0].split('/')[0]},{output_line.split()[0].split('/')[1]},{output_line.split()[1]},{output_line.split()[2]}\n"  # noqa: E501
+                    self.write_file()
 
-                    if output_line.count('tcp') > 0:
-                        self.write = f"{self.asn},{ip},{output_line.split()[0].split('/')[0]},{output_line.split()[0].split('/')[1]},{output_line.split()[1]},{output_line.split()[2]}\n"  # noqa: E501
-                        self.write_file()
-
-                    if output_line.count('udp') > 0:
-                        self.write = f"{self.asn},{ip},{output_line.split()[0].split('/')[0]},{output_line.split()[0].split('/')[1]},{output_line.split()[1]},{output_line.split()[2]}\n"  # noqa: E501
-                        self.write_file()
+                if output_line.count('udp') > 0:
+                    self.write = f"{self.asn},{ip},{output_line.split()[0].split('/')[0]},{output_line.split()[0].split('/')[1]},{output_line.split()[1]},{output_line.split()[2]}\n"  # noqa: E501
+                    self.write_file()
 
     def write_file(self):
         """ Write file """
