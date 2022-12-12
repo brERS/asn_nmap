@@ -8,11 +8,13 @@ Description.
 	- Nmap: 
 		- scan_asn 
 
+
 ## Installation
 
 Use the package manager [pip](https://pip.pypa.io/en/stable/) to install package_name
 
 ```bash
+apt-get install nmap -y
 pip install asn-nmap
 ```
 
