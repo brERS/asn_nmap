@@ -23,7 +23,7 @@ pip install asn-nmap
 from asn_nmap.nmap import Nmap
 
 nmap = Nmap()
-nmap.scan_asn(262680, [80, 443])
+nmap.scan_asn(15169, [80, 443])
 ```
 
 #### an output.xlsx file will be automatically generated
