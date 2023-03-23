@@ -27,25 +27,51 @@ class Export:
         """
 
         try:
-            all = pd.read_csv(self.file_output_temp, sep=',', header=None)
-            all.columns = ["ASN", "IP", "Port", "Protocol", "State", "Service"]
 
-            port_open_temp = all.loc[all['State'] == 'open']
+            all_data = pd.read_csv(
+                'output_temp.txt', 
+                header=None, 
+                names=["ASN", "IP", "Port", "Protocol", "State", "Service"]
+            )
 
-            port_open = port_open_temp[
-                ['ASN', 'IP', 'Port', 'Protocol', 'State', 'Service']
-            ]
+            # O Nmap divide as portas em seis estados:
+            states = dict.fromkeys(
+                [
+                    'open',
+                    'closed',
+                    'filtered',
+                    'unfiltered',
+                    'open|filtered',
+                    'closed|filtered'
+                ],
+                ''
+            )
 
-            dashboard = port_open.groupby(['ASN', 'Port']).size(
-            ).reset_index(name='Quantidade')
+
+            for state in states:
+                states[state] = all_data.loc[all_data['State'] == state]
+
+
+            dashboard = all_data.groupby(
+                ['ASN', 'Port', 'Protocol', 'State']
+            ).size().reset_index(name='Quantidade')
+
 
             with pd.ExcelWriter(f'{destination_file_name}.xlsx') as writer:
+                
                 dashboard.to_excel(writer, sheet_name='Dashboard', index=False)
-                port_open.to_excel(writer, sheet_name='Port_Open', index=False)
-                all.to_excel(writer, sheet_name='All_Info', index=False)
+
+                for state_name, state_data in states.items():
+                    if not state_data.empty:
+                        state_data.to_excel(
+                            writer,
+                            sheet_name=f'state_{state_name}',
+                            index=False
+                        )
+
+                all_data.to_excel(writer, sheet_name='All_Info', index=False)
 
         except FileNotFoundError:
-            self.error = True
             rprint(
                 "[red]ERRO: Temporary file was not created in the folder[/red]"
             )
