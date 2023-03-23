@@ -1,0 +1,22 @@
+site_name: ASN NMAP
+repo_url: https://github.com/brERS/asn_nmap
+repo_name: brERS/asn_nmap
+edit_uri: tree/main/docs
+
+theme:
+  name: material
+  language: pt-BR
+  logo: assets/img/logo.png
+  favicon: assets/img/logo.png
+
+markdown_extensions:
+  - attr_list
+
+extra_css:
+  - stylesheets/extra.css
+
+plugins:
+- mkdocstrings:
+    handlers:
+      python:
+        paths: [asn_nmap]
